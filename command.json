@@ -1,0 +1,119 @@
+{
+  "name": "lung-tumor-vae-features-xnat",
+  "label": "Lung tumor VAE features",
+  "description": "Runs lung tumor VAE radiomics feature extraction from CT and lesion-mask resources.",
+  "version": "0.01",
+  "image": "mmilch01/lung-tumor-vae-features-xnat:0.01",
+  "type": "docker",
+  "command-line": "python /opt/packages/user/runtime_repo/entrypoint.py --project #PROJECT# --session #EXPERIMENT# --host $XNAT_HOST --user $XNAT_USER --pass $XNAT_PASS",
+  "mounts": [
+    {
+      "name": "input",
+      "writable": false,
+      "path": "/input"
+    }
+  ],
+  "environment-variables": {},
+  "ports": {},
+  "inputs": [
+    {
+      "name": "workflow_id",
+      "description": "Lung tumor VAE features",
+      "type": "string",
+      "default-value": "NONE",
+      "required": true,
+      "replacement-key": "#WORKFLOW_ID#",
+      "select-values": []
+    },
+    {
+      "name": "PROJECT",
+      "type": "string",
+      "required": true,
+      "select-values": []
+    },
+    {
+      "name": "SUBJECT",
+      "type": "string",
+      "required": true,
+      "select-values": []
+    },
+    {
+      "name": "EXPERIMENT",
+      "type": "string",
+      "required": true,
+      "select-values": []
+    }
+  ],
+  "outputs": [],
+  "xnat": [
+    {
+      "name": "lung-tumor-vae-features-xnat",
+      "label": "Lung tumor VAE features",
+      "description": "Lung tumor VAE feature extraction",
+      "contexts": ["xnat:imageSessionData"],
+      "external-inputs": [
+        {
+          "name": "session",
+          "description": "Input session",
+          "type": "Session",
+          "required": true,
+          "provides-files-for-command-mount": "input",
+          "load-children": false
+        }
+      ],
+      "derived-inputs": [
+        {
+          "name": "project",
+          "type": "Project",
+          "required": true,
+          "user-settable": false,
+          "load-children": false,
+          "derived-from-wrapper-input": "session",
+          "multiple": false
+        },
+        {
+          "name": "project-id",
+          "description": "Project id",
+          "type": "string",
+          "required": true,
+          "provides-value-for-command-input": "PROJECT",
+          "load-children": true,
+          "derived-from-wrapper-input": "session",
+          "derived-from-xnat-object-property": "project-id",
+          "multiple": false
+        },
+        {
+          "name": "subject-label",
+          "description": "subject label",
+          "type": "string",
+          "required": true,
+          "provides-value-for-command-input": "SUBJECT",
+          "load-children": true,
+          "derived-from-wrapper-input": "session",
+          "derived-from-xnat-object-property": "subject-id",
+          "multiple": false
+        },
+        {
+          "name": "session-label",
+          "description": "session label",
+          "type": "string",
+          "required": true,
+          "provides-value-for-command-input": "EXPERIMENT",
+          "load-children": true,
+          "derived-from-wrapper-input": "session",
+          "derived-from-xnat-object-property": "label",
+          "multiple": false
+        }
+      ],
+      "output-handlers": []
+    }
+  ],
+  "reserve-memory": 16384,
+  "limit-cpu": 8,
+  "shm-size": 2147483648,
+  "container-labels": {},
+  "generic-resources": {},
+  "ulimits": {},
+  "secrets": [],
+  "visibility": "public"
+}
