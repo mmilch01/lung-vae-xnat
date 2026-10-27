@@ -19,6 +19,7 @@ def parse_args():
         description="Run variational auto-encoder feature extractor for lung tumors on CT structural scans in an XNAT session. Lung tumor segmentation nsclc-segmentation-codebase-20260317 must have been run previously."
     )
     parser.add_argument("--project", required=True, help="XNAT project label.")
+    parser.add_argument("--subject", required=True, help="XNAT subject ID supplied by the session wrapper; overrides DICOM PatientName.")
     parser.add_argument("--session", help="XNAT experiment/session label or ID.")
     parser.add_argument("--host", help="XNAT host URL. Defaults to XNAT_HOST.")
     parser.add_argument("--user", help="XNAT username. Defaults to XNAT_USER.")
@@ -114,7 +115,12 @@ def main():
     processed_scan_count = 0
     for scan in scans:
         dt = datetime.datetime.now().strftime("%Y%m%d_%H%M")
-        job = wa.populate_job_fields("container", global_vars, workflow_id, scan, scan_key="StructScan")
+        # DICOM PatientName may be anonymized and does not identify the XNAT subject.
+        scan = dict(scan, Subject=args.subject)
+        job = wa.populate_job_fields(
+            "container", global_vars, workflow_id, scan,
+            subject=args.subject, scan_key="StructScan",
+        )
         job["job_resource_context"] = global_vars["g_input_mount_path"] / "RESOURCES" / "nsclc-segmentation-codebase-20260317"
         job["job_mask_path"] = job["job_resource_context"] / "lesion_mask.nii.gz"
         if not job["job_mask_path"].exists():
