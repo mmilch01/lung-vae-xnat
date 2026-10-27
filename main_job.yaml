@@ -3,7 +3,7 @@ steps:
     step_command: mkdir -p {job_workdir}/scan{job_scan_id}
 
   - step_title: 2. Create lesion CSV for the VAE radiomics job
-    step_command: bash -c "printf 'image_path,mask_path,lesion_id\n/input/RESOURCES/nsclc-segmentation-codebase-20260317/ct_struct.nii.gz,/input/RESOURCES/nsclc-segmentation-codebase-20260317/lesion_mask.nii.gz,Tumor_001\n' > {job_workdir}/scan{job_scan_id}/lesions.csv"
+    step_command: bash -c "printf 'image_path,mask_path,lesion_id\n/input/RESOURCES/nsclc-segmentation-codebase-20260317/scan{job_scan_id}/ct_struct.nii.gz,/input/RESOURCES/nsclc-segmentation-codebase-20260317/scan{job_scan_id}/lesion_mask.nii.gz,Tumor_001\n' > {job_workdir}/scan{job_scan_id}/lesions.csv"
 
   - step_title: 3. Run lung tumor VAE radiomics feature extraction
     step_command: micromamba run -p {g_env_repo_dir} python -m vae_radiomics --checkpoint /opt/packages/user/alg_repo/radiomics-toolbox-nsclc-codebase-20260318/checkpoints/Saved_VAE3D.ckpt --csv {job_workdir}/scan{job_scan_id}/"lesions.csv" --output {job_workdir}/scan{job_scan_id}/features --format both

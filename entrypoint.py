@@ -121,7 +121,7 @@ def main():
             "container", global_vars, workflow_id, scan,
             subject=args.subject, scan_key="StructScan",
         )
-        job["job_resource_context"] = global_vars["g_input_mount_path"] / "RESOURCES" / "nsclc-segmentation-codebase-20260317"
+        job["job_resource_context"] = global_vars["g_input_mount_path"] / "RESOURCES" / "nsclc-segmentation-codebase-20260317" / f"scan{job['job_scan_id']}"
         job["job_mask_path"] = job["job_resource_context"] / "lesion_mask.nii.gz"
         if not job["job_mask_path"].exists():
             print(f"Skipping scan {scan.get('StructScan', 'unknown')} because {job['job_mask_path']} is missing.")

@@ -2,8 +2,8 @@
   "name": "lung-tumor-vae-features-xnat",
   "label": "Lung tumor VAE features",
   "description": "Runs lung tumor VAE radiomics feature extraction from CT and lesion-mask resources.",
-  "version": "0.01",
-  "image": "mmilch01/lung-tumor-vae-features-xnat:0.11",
+  "version": "0.12",
+  "image": "mmilch01/lung-tumor-vae-features-xnat:0.12",
   "type": "docker",
   "command-line": "python /opt/packages/user/runtime_repo/entrypoint.py --project #PROJECT# --subject #SUBJECT# --session #EXPERIMENT# --host $XNAT_HOST --user $XNAT_USER --pass $XNAT_PASS",
   "mounts": [
