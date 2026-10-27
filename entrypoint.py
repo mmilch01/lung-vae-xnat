@@ -148,11 +148,15 @@ def main():
         wa.workflow_to_batch(job, global_vars, batch_file)
         batch_file.chmod(0o755)
         print(f"Written {batch_file}")
-
-        result = subprocess.run(["bash", str(batch_file)], check=False)
+        try:
+            result = subprocess.run(["bash", str(batch_file)], check=False)
+        except Exception as e:
+            print(f'WARNING: scan {job["job_scan_id"]} could not be processed: {e}' )
+            continue
         if result.returncode != 0:
-            raise RuntimeError(f"Batch file failed with exit code {result.returncode}: {batch_file}")
-        print(f"Completed {batch_file}")
+            print(f"WARNING: scan {job['job_scan_id']} failed with return code {result.returncode}: {batch_file}")
+        else:
+            print(f'Completed {batch_file}')
 
 if __name__ == "__main__":
     main()
