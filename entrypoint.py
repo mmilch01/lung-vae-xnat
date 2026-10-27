@@ -90,12 +90,12 @@ def main():
 
     subjects, scans = reindex_to_structurals_and_segs(d, xnat_structure_file, scanlist_file)
 
-    workflow_id = "ABDOMINAL_CT_SEGMENTATION"
+    workflow_id = "radiomics-toolbox-nsclc-codebase-20260318"
     user_env_repo = "/opt/packages/user/env_repo"
     user_src_repo = "/opt/packages/user/alg_repo"
 
     global_vars = wa.init_global_vars(
-        "jupyter",
+        "container",
         project,
         workflow_id,
         g_user_env_repo=user_env_repo,
@@ -105,38 +105,23 @@ def main():
         g_pymipl_dir=pymipl_path,
     )
 
-    filtered_scans = []
-    for scan in scans:
-        job = wa.populate_job_fields("jupyter", global_vars, workflow_id, scan, scan_key="StructScan")
-        job["job_resource_context"] = (
-            global_vars["g_input_mount_path"] / "RESOURCES" / job["job_exp_label"] / "nsclc-segmentation-codebase-20260317"
-        )
-        lesion_mask = job["job_resource_context"] / "lesion_mask.nii.gz"
-        if lesion_mask.exists():
-            filtered_scans.append(scan)
-    scans = filtered_scans
-    print(f"Number of scans with a lesion mask in {global_vars['g_input_mount_path'] / 'RESOURCES'}: {len(scans)}")
-
-    if len(scans) == 0:
-        raise ValueError(
-            "No scans with lesion_mask.nii.gz found under "
-            f"{global_vars['g_input_mount_path'] / 'RESOURCES' / '<experiment>' / 'nsclc-segmentation-codebase-20260317'}."
-        )
-
     print(f"global vars:{global_vars}")
     wa.set_logger()
     os.environ["XNAT_HOST"] = args.host
     os.environ["XNAT_USER"] = args.user
     os.environ["XNAT_PASS"] = args.password
 
+    processed_scan_count = 0
     for scan in scans:
         dt = datetime.datetime.now().strftime("%Y%m%d_%H%M")
-        job = wa.populate_job_fields("jupyter", global_vars, workflow_id, scan, scan_key="StructScan")
-        job["job_resource_context"] = (
-            global_vars["g_input_mount_path"] / "RESOURCES" / job["job_exp_label"] / "nsclc-segmentation-codebase-20260317"
-        )
-        job["job_struct_path"] = job["job_resource_context"] / "ct_struct.nii.gz"
+        job = wa.populate_job_fields("container", global_vars, workflow_id, scan, scan_key="StructScan")
+        job["job_resource_context"] = global_vars["g_input_mount_path"] / "RESOURCES" / "nsclc-segmentation-codebase-20260317"
         job["job_mask_path"] = job["job_resource_context"] / "lesion_mask.nii.gz"
+        if not job["job_mask_path"].exists():
+            print(f"Skipping scan {scan.get('StructScan', 'unknown')} because {job['job_mask_path']} is missing.")
+            continue
+        processed_scan_count += 1
+        job["job_struct_path"] = job["job_resource_context"] / "ct_struct.nii.gz"
         job_yaml = Path(__file__).with_name("main_job.yaml")
 
         with open(job_yaml, "r") as f:
